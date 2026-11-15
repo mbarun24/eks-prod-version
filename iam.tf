@@ -1,6 +1,52 @@
+resource "aws_iam_role" "eks_cluster" {
+  name = coalesce(var.cluster_role_name, "${var.cluster_name}-ClusterRole")
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "eks.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster" {
+  role       = aws_iam_role.eks_cluster.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+resource "aws_iam_role" "eks_node" {
+  name = coalesce(var.node_role_name, "${var.cluster_name}-NodeRole")
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_node" {
+  for_each = toset([
+    "AmazonEKSWorkerNodePolicy",
+    "AmazonEC2ContainerRegistryPullOnly",
+    "AmazonEKS_CNI_Policy"
+  ])
+
+  role       = aws_iam_role.eks_node.name
+  policy_arn = "arn:aws:iam::aws:policy/${each.value}"
+}
+
 # Below code is for ebs csi
 resource "aws_iam_role" "ebs_csi" {
-  name = "pathnex-AmazonEKSPodIdentityAmazonEBSCSIDriverRole"
+  name = coalesce(var.ebs_csi_role_name, "${var.cluster_name}-EBSCSIRole")
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -43,7 +89,7 @@ resource "aws_eks_pod_identity_association" "ebs_csi" {
 
 # Below code is for Cluster Autoscaler
 resource "aws_iam_role" "cluster_autoscaler" {
-  name = "pathnex-ClusterAutoscalerRole"
+  name = coalesce(var.autoscaler_role_name, "${var.cluster_name}-ClusterAutoscalerRole")
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -67,7 +113,7 @@ resource "aws_iam_role" "cluster_autoscaler" {
 
 # This will help in attaching the policy
 resource "aws_iam_policy" "cluster_autoscaler" {
-  name        = "pathnex-ClusterAutoscalerPolicy"
+  name        = coalesce(var.autoscaler_policy_name, "${var.cluster_name}-ClusterAutoscalerPolicy")
   description = "Permissions for Kubernetes Cluster Autoscaler"
 
   policy = jsonencode({
@@ -106,7 +152,7 @@ resource "aws_iam_policy" "cluster_autoscaler" {
           StringEquals = {
             "aws:ResourceTag/k8s.io/cluster-autoscaler/enabled" = "true"
 
-            "aws:ResourceTag/k8s.io/cluster-autoscaler/Pathnex-oct-2026" = "owned"
+            "aws:ResourceTag/k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
           }
         }
       }

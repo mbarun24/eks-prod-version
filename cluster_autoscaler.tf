@@ -12,7 +12,7 @@ resource "helm_release" "cluster_autoscaler" {
         clusterName = aws_eks_cluster.pathnex.name
       }
 
-      awsRegion     = "ap-south-1"
+      awsRegion     = var.aws_region
       cloudProvider = "aws"
 
       rbac = {
@@ -25,6 +25,7 @@ resource "helm_release" "cluster_autoscaler" {
   ]
 
   depends_on = [
+    aws_eks_node_group.pathnex-NG,
     aws_eks_pod_identity_association.cluster_autoscaler
   ]
 }

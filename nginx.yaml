@@ -32,3 +32,16 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+
+
+# Adding PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pathnex-pdb
+  namespace: nginx
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: pathnex

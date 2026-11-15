@@ -14,11 +14,16 @@ spec:
       hosts:
         - "*"
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pathnex-vs
+---
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: pathnex
-  namespace: nginx
+  namespace: pathnex-vs
 spec:
   hosts:
     - "*"

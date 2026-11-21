@@ -1,69 +1,69 @@
 resource "aws_eks_addon" "ebs_csi" {
-  cluster_name  = aws_eks_cluster.pathnex.name
+  cluster_name  = aws_eks_cluster.practice.name
   addon_name    = "aws-ebs-csi-driver"
   addon_version = "v1.63.1-eksbuild.1"
 
   depends_on = [
     aws_iam_role_policy_attachment.ebs_csi,
-    aws_eks_cluster.pathnex,
+    aws_eks_cluster.practice,
     aws_eks_addon.pod_identity,
     helm_release.cluster_autoscaler
   ]
 }
 
 resource "aws_eks_addon" "coredns" {
-  cluster_name  = aws_eks_cluster.pathnex.name
+  cluster_name  = aws_eks_cluster.practice.name
   addon_name    = "coredns"
   addon_version = "v1.13.2-eksbuild.1"
-  depends_on = [aws_eks_cluster.pathnex,
+  depends_on = [aws_eks_cluster.practice,
     helm_release.cluster_autoscaler
   ]
 }
 
 resource "aws_eks_addon" "node_monitoring" {
-  cluster_name  = aws_eks_cluster.pathnex.name
+  cluster_name  = aws_eks_cluster.practice.name
   addon_name    = "eks-node-monitoring-agent"
   addon_version = "v1.7.0-eksbuild.1"
-  depends_on = [aws_eks_cluster.pathnex,
+  depends_on = [aws_eks_cluster.practice,
   helm_release.cluster_autoscaler]
 }
 
 resource "aws_eks_addon" "pod_identity" {
-  cluster_name  = aws_eks_cluster.pathnex.name
+  cluster_name  = aws_eks_cluster.practice.name
   addon_name    = "eks-pod-identity-agent"
   addon_version = "v1.3.10-eksbuild.3"
-  depends_on    = [aws_eks_cluster.pathnex]
+  depends_on    = [aws_eks_cluster.practice]
 }
 
 resource "aws_eks_addon" "external_dns" {
-  cluster_name  = aws_eks_cluster.pathnex.name
+  cluster_name  = aws_eks_cluster.practice.name
   addon_name    = "external-dns"
   addon_version = "v0.21.0-eksbuild.6"
-  depends_on = [aws_eks_cluster.pathnex,
+  depends_on = [aws_eks_cluster.practice,
   helm_release.cluster_autoscaler]
 }
 
 resource "aws_eks_addon" "kube_proxy" {
-  cluster_name  = aws_eks_cluster.pathnex.name
+  cluster_name  = aws_eks_cluster.practice.name
   addon_name    = "kube-proxy"
   addon_version = "v1.34.3-eksbuild.2"
-  depends_on = [aws_eks_cluster.pathnex,
+  depends_on = [aws_eks_cluster.practice,
   helm_release.cluster_autoscaler]
 }
 
 resource "aws_eks_addon" "metrics_server" {
-  cluster_name  = aws_eks_cluster.pathnex.name
+  cluster_name  = aws_eks_cluster.practice.name
   addon_name    = "metrics-server"
   addon_version = "v0.9.0-eksbuild.5"
-  depends_on = [aws_eks_cluster.pathnex,
+  depends_on = [aws_eks_cluster.practice,
   helm_release.cluster_autoscaler]
 }
 
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name  = aws_eks_cluster.pathnex.name
+  cluster_name  = aws_eks_cluster.practice.name
   addon_name    = "vpc-cni"
   addon_version = "v1.22.4-eksbuild.3"
-  depends_on = [aws_eks_cluster.pathnex,
+  depends_on = [aws_eks_cluster.practice,
   helm_release.cluster_autoscaler]
 }
 
@@ -77,7 +77,7 @@ resource "helm_release" "keda" {
   create_namespace = true
 
   depends_on = [
-    aws_eks_cluster.pathnex,
+    aws_eks_cluster.practice,
     aws_eks_addon.pod_identity
   ]
 }
@@ -94,7 +94,7 @@ resource "helm_release" "istio_base" {
   create_namespace = true
 
   depends_on = [
-    aws_eks_cluster.pathnex
+    aws_eks_cluster.practice
   ]
 }
 
@@ -135,7 +135,7 @@ data "aws_caller_identity" "karpenter" {}
 data "aws_partition" "karpenter" {}
 
 resource "aws_iam_role" "karpenter" {
-  name = "${aws_eks_cluster.pathnex.name}-KarpenterController"
+  name = "${aws_eks_cluster.practice.name}-KarpenterController"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -145,7 +145,7 @@ resource "aws_iam_role" "karpenter" {
       Action    = ["sts:AssumeRole", "sts:TagSession"]
       Condition = {
         StringEquals = {
-          "aws:RequestTag/eks-cluster-name"           = aws_eks_cluster.pathnex.name
+          "aws:RequestTag/eks-cluster-name"           = aws_eks_cluster.practice.name
           "aws:RequestTag/kubernetes-namespace"       = "karpenter"
           "aws:RequestTag/kubernetes-service-account" = "karpenter"
         }
@@ -158,7 +158,7 @@ resource "aws_iam_role" "karpenter" {
 # Interruption queue permissions are omitted because no queue is configured.
 # PassRole is limited to the existing EKS node role; use it in EC2NodeClass.spec.role.
 resource "aws_iam_policy" "karpenter" {
-  name = "${aws_eks_cluster.pathnex.name}-KarpenterController"
+  name = "${aws_eks_cluster.practice.name}-KarpenterController"
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -187,7 +187,7 @@ resource "aws_iam_policy" "karpenter" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned"
+            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.sh/nodepool" : "*"
@@ -213,8 +213,8 @@ resource "aws_iam_policy" "karpenter" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:RequestTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned",
-            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.pathnex.name}"
+            "aws:RequestTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.practice.name}"
           },
           "StringLike" : {
             "aws:RequestTag/karpenter.sh/nodepool" : "*"
@@ -235,8 +235,8 @@ resource "aws_iam_policy" "karpenter" {
         "Action" : "ec2:CreateTags",
         "Condition" : {
           "StringEquals" : {
-            "aws:RequestTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned",
-            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.pathnex.name}",
+            "aws:RequestTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.practice.name}",
             "ec2:CreateAction" : [
               "RunInstances",
               "CreateFleet",
@@ -255,13 +255,13 @@ resource "aws_iam_policy" "karpenter" {
         "Action" : "ec2:CreateTags",
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned"
+            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.sh/nodepool" : "*"
           },
           "StringEqualsIfExists" : {
-            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.pathnex.name}"
+            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.practice.name}"
           },
           "ForAllValues:StringEquals" : {
             "aws:TagKeys" : [
@@ -285,7 +285,7 @@ resource "aws_iam_policy" "karpenter" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned"
+            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.sh/nodepool" : "*"
@@ -328,7 +328,7 @@ resource "aws_iam_policy" "karpenter" {
       {
         "Sid" : "AllowPassingInstanceRole",
         "Effect" : "Allow",
-        "Resource" : "${aws_eks_node_group.pathnex-NG.node_role_arn}",
+        "Resource" : "${aws_eks_node_group.practice-NG.node_role_arn}",
         "Action" : "iam:PassRole",
         "Condition" : {
           "StringEquals" : {
@@ -348,8 +348,8 @@ resource "aws_iam_policy" "karpenter" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:RequestTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned",
-            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.pathnex.name}",
+            "aws:RequestTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.practice.name}",
             "aws:RequestTag/topology.kubernetes.io/region" : "${var.aws_region}"
           },
           "StringLike" : {
@@ -366,10 +366,10 @@ resource "aws_iam_policy" "karpenter" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned",
+            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned",
             "aws:ResourceTag/topology.kubernetes.io/region" : "${var.aws_region}",
-            "aws:RequestTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned",
-            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.pathnex.name}",
+            "aws:RequestTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "${aws_eks_cluster.practice.name}",
             "aws:RequestTag/topology.kubernetes.io/region" : "${var.aws_region}"
           },
           "StringLike" : {
@@ -389,7 +389,7 @@ resource "aws_iam_policy" "karpenter" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.pathnex.name}" : "owned",
+            "aws:ResourceTag/kubernetes.io/cluster/${aws_eks_cluster.practice.name}" : "owned",
             "aws:ResourceTag/topology.kubernetes.io/region" : "${var.aws_region}"
           },
           "StringLike" : {
@@ -406,7 +406,7 @@ resource "aws_iam_policy" "karpenter" {
       {
         "Sid" : "AllowAPIServerEndpointDiscovery",
         "Effect" : "Allow",
-        "Resource" : "arn:${data.aws_partition.karpenter.partition}:eks:${var.aws_region}:${data.aws_caller_identity.karpenter.account_id}:cluster/${aws_eks_cluster.pathnex.name}",
+        "Resource" : "arn:${data.aws_partition.karpenter.partition}:eks:${var.aws_region}:${data.aws_caller_identity.karpenter.account_id}:cluster/${aws_eks_cluster.practice.name}",
         "Action" : "eks:DescribeCluster"
       }
     ]
@@ -419,7 +419,7 @@ resource "aws_iam_role_policy_attachment" "karpenter" {
 }
 
 resource "aws_eks_pod_identity_association" "karpenter" {
-  cluster_name    = aws_eks_cluster.pathnex.name
+  cluster_name    = aws_eks_cluster.practice.name
   namespace       = "karpenter"
   service_account = "karpenter"
   role_arn        = aws_iam_role.karpenter.arn
@@ -447,7 +447,7 @@ resource "helm_release" "karpenter" {
     }
     # Recreate existing pods after associating their service account with IAM.
     podAnnotations = {
-      "pathnex.io/pod-identity-association" = aws_eks_pod_identity_association.karpenter.association_id
+      "practice.io/pod-identity-association" = aws_eks_pod_identity_association.karpenter.association_id
     }
     controller = {
       env = [{
@@ -460,12 +460,12 @@ resource "helm_release" "karpenter" {
   set = [
     {
       name  = "settings.clusterName"
-      value = aws_eks_cluster.pathnex.name
+      value = aws_eks_cluster.practice.name
     }
   ]
 
   depends_on = [
-    aws_eks_cluster.pathnex,
+    aws_eks_cluster.practice,
     aws_eks_addon.pod_identity
   ]
 }

@@ -26,7 +26,7 @@ variable "public_access_cidrs" {
 
 variable "node_group_name" {
   type    = string
-  default = "pathnex-ng"
+  default = "practice-ng"
 }
 
 variable "node_ami_type" {
@@ -109,3 +109,4 @@ variable "node_scaling" {
     error_message = "Scaling must satisfy 0 <= min_size <= desired_size <= max_size."
   }
 }
+

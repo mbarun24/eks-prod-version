@@ -18,15 +18,15 @@ provider "aws" {
 }
 
 provider "kubernetes" {
-  host                   = aws_eks_cluster.pathnex.endpoint
-  cluster_ca_certificate = base64decode(aws_eks_cluster.pathnex.certificate_authority[0].data)
+  host                   = aws_eks_cluster.practice.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.practice.certificate_authority[0].data)
 
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
     args = [
       "eks", "get-token",
-      "--cluster-name", aws_eks_cluster.pathnex.name,
+      "--cluster-name", aws_eks_cluster.practice.name,
       "--region", var.aws_region
     ]
   }
@@ -34,9 +34,9 @@ provider "kubernetes" {
 
 provider "helm" {
   kubernetes = {
-    host = aws_eks_cluster.pathnex.endpoint
+    host = aws_eks_cluster.practice.endpoint
     cluster_ca_certificate = base64decode(
-      aws_eks_cluster.pathnex.certificate_authority[0].data
+      aws_eks_cluster.practice.certificate_authority[0].data
     )
 
     exec = {
@@ -47,10 +47,11 @@ provider "helm" {
         "eks",
         "get-token",
         "--cluster-name",
-        aws_eks_cluster.pathnex.name,
+        aws_eks_cluster.practice.name,
         "--region",
         var.aws_region
       ]
     }
   }
 }
+

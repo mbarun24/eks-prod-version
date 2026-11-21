@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pathnex
+  name: practice
   namespace: nginx
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: pathnex
+      app: practice
   template:
     metadata:
       labels:
-        app: pathnex
+        app: practice
     spec:
       containers:
         - name: nginx
@@ -24,11 +24,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: pathnex
+  name: practice
   namespace: nginx
 spec:
   selector:
-    app: pathnex
+    app: practice
   ports:
     - port: 80
       targetPort: 80
@@ -39,10 +39,10 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: pathnex-pdb
+  name: practice-pdb
   namespace: nginx
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: pathnex
+      app: practice

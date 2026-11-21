@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
-  name: pathnex-gateway
+  name: practice-gateway
   namespace: istio-ingress
 spec:
   selector:
@@ -17,18 +17,18 @@ spec:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: pathnex-vs
+  name: practice-vs
 ---
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
-  name: pathnex
-  namespace: pathnex-vs
+  name: practice
+  namespace: practice-vs
 spec:
   hosts:
     - "*"
   gateways:
-    - istio-ingress/pathnex-gateway
+    - istio-ingress/practice-gateway
   http:
     - match:
         - uri:
@@ -52,6 +52,6 @@ spec:
               number: 80
     - route:
         - destination:
-            host: pathnex.nginx.svc.cluster.local
+            host: practice.nginx.svc.cluster.local
             port:
               number: 80

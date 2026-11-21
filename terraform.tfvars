@@ -1,5 +1,5 @@
 aws_region         = "ap-southeast-2"
-cluster_name       = "Pathnex-nov-2026"
+cluster_name       = "Practice-2026"
 kubernetes_version = "1.36"
 subnet_ids = [
   "subnet-0cd8063842a7c3418",
@@ -13,7 +13,7 @@ ssh_security_group_ids = ["sg-07455d06c80bd1794"]
 # Preserve existing IAM names. Omit these overrides for a new cluster.
 cluster_role_name      = "AmazonEKSClusterRole"
 node_role_name         = "AmazonEKSNodeRole"
-ebs_csi_role_name      = "pathnex-AmazonEKSPodIdentityAmazonEBSCSIDriverRole"
-autoscaler_role_name   = "pathnex-ClusterAutoscalerRole"
-autoscaler_policy_name = "pathnex-ClusterAutoscalerPolicy"
+ebs_csi_role_name      = "practice-AmazonEKSPodIdentityAmazonEBSCSIDriverRole"
+autoscaler_role_name   = "practice-ClusterAutoscalerRole"
+autoscaler_policy_name = "practice-ClusterAutoscalerPolicy"
 
